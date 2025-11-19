@@ -5089,7 +5089,7 @@ int asCScriptEngine::GetTypeIdFromDataType(const asCDataType &dtIn) const
 
 	int typeId = -1;
 	asCTypeInfo *ot = dtIn.GetTypeInfo();
-	asASSERT(ot != &functionBehaviours);
+	asASSERT(ot != &static_cast<const asCTypeInfo&>(functionBehaviours));
 	// Object's hold the typeId themselves
 	typeId = ot->typeId;
 

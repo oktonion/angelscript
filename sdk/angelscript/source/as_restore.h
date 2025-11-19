@@ -150,6 +150,7 @@ protected:
 		asSListPatternNode *patternNode;
 		int                 nextTypeId;
 	};
+	friend struct SListAdjuster;
 	asCArray<SListAdjuster*> listAdjusters;
 
 	// Used by FindObjectPropOffset

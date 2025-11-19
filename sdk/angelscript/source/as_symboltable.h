@@ -69,16 +69,20 @@ struct asIFilter
 template<class T>
 class asCSymbolTable;
 
-
+template<class T, class T2>
+struct asCSymbolTableIterator_fix_bug { typedef T2 type; };
+template<class T>
+struct asCSymbolTableIterator_fix_bug<T, T> { typedef T type; };
 
 
 // Iterator that allows iterating in index order
 template<class T, class T2 = T>
 class asCSymbolTableIterator
 {
+	typedef typename asCSymbolTableIterator_fix_bug<T, T2>::type type;
 public:
-	T2* operator*() const;
-	T2* operator->() const;
+	type* operator*() const;
+	type* operator->() const;
 	asCSymbolTableIterator<T, T2>& operator++(int);
 	asCSymbolTableIterator<T, T2>& operator--(int);
 	operator bool() const;
@@ -494,7 +498,7 @@ asCSymbolTableIterator<T, T2>::asCSymbolTableIterator(asCSymbolTable<T> *table) 
 
 
 template<class T, class T2>
-T2* asCSymbolTableIterator<T, T2>::operator*() const
+typename asCSymbolTableIterator_fix_bug<T, T2>::type* asCSymbolTableIterator<T, T2>::operator*() const
 {
 	asASSERT(m_table->CheckIdx(m_idx));
 	return m_table->m_entries[m_idx];
@@ -503,7 +507,7 @@ T2* asCSymbolTableIterator<T, T2>::operator*() const
 
 
 template<class T, class T2>
-T2* asCSymbolTableIterator<T, T2>::operator->() const
+typename asCSymbolTableIterator_fix_bug<T, T2>::type* asCSymbolTableIterator<T, T2>::operator->() const
 {
 	asASSERT(m_table->CheckIdx(m_idx));
 	return m_table->m_entries[m_idx];
