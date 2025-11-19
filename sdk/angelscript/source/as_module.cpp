@@ -822,9 +822,10 @@ void asCModule::InternalReset()
 	globIt = m_scriptGlobals.List();
 	while( globIt )
 	{
-		m_engine->RemoveGlobalProperty(*globIt);
-		asASSERT( (*globIt)->refCount.get() == 1 );
-		(*globIt)->Release();
+		asCGlobalProperty* ptr = *globIt;
+		m_engine->RemoveGlobalProperty(ptr);
+		asASSERT(ptr->refCount.get() == 1 );
+		ptr->Release();
 		globIt++;
 	}
 	m_scriptGlobals.Clear();

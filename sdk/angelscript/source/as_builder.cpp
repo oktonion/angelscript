@@ -111,11 +111,12 @@ asCBuilder::~asCBuilder()
 	asCSymbolTable<sGlobalVariableDescription>::iterator it = globVariables.List();
 	while( it )
 	{
-		if( (*it)->declaredAtNode )
-			(*it)->declaredAtNode->Destroy(engine);
-		if( (*it)->initializationNode )
-			(*it)->initializationNode->Destroy(engine);
-		asDELETE((*it),sGlobalVariableDescription);
+		sGlobalVariableDescription *ptr = *it;
+		if(ptr->declaredAtNode)
+			ptr->declaredAtNode->Destroy(engine);
+		if(ptr->initializationNode)
+			ptr->initializationNode->Destroy(engine);
+		asDELETE(ptr,sGlobalVariableDescription);
 		it++;
 	}
 	globVariables.Clear();
@@ -6060,7 +6061,8 @@ void asCBuilder::WriteError(const asCString &message, asCScriptCode *file, asCSc
 	if( node && file )
 		file->ConvertPosToRowCol(node->tokenPos, &r, &c);
 
-	WriteError(file ? file->name : asCString(""), message, r, c);
+	asCString file_name = file ? file->name : asCString("");
+	WriteError(file_name, message, r, c);
 }
 
 void asCBuilder::WriteError(const asCString &scriptname, const asCString &message, int r, int c)
@@ -6088,7 +6090,8 @@ void asCBuilder::WriteWarning(const asCString &message, asCScriptCode *file, asC
 	if( node && file )
 		file->ConvertPosToRowCol(node->tokenPos, &r, &c);
 
-	WriteWarning(file ? file->name : asCString(""), message, r, c);
+	asCString file_name = file ? file->name : asCString("");
+	WriteWarning(file_name, message, r, c);
 }
 
 // TODO: child funcdef: Should try to eliminate this function. GetNameSpaceFromNode is more complete

@@ -37,6 +37,7 @@
 
 #include <math.h> // fmodf() pow()
 
+
 #ifdef _MSC_VER
 // Apparently a bug in MSVC (or perhaps Windows SDK) caused use HUGE_VALF to issue a warning
 // ref: https://developercommunity.visualstudio.com/t/C4756-related-issues-in-VS-2022/10697767
@@ -55,6 +56,16 @@
 #include "as_parser.h"
 #include "as_debug.h"
 #include "as_context.h"  // as_powi()
+
+#ifndef HUGE_VALF
+#include <limits>
+#endif
+
+#define ISNAN(v) (v != v)
+#define ISINF(v) (!ISNAN(v) && ISNAN(v-v))
+#ifndef HUGE_VALF
+#define HUGE_VALF (std::numeric_limits<float>::infinity())
+#endif
 
 BEGIN_AS_NAMESPACE
 
@@ -9397,14 +9408,16 @@ void asCCompiler::ImplicitConversionConstant(asCExprContext *from, const asCData
 				if( asINT8(from->type.GetConstantDW()) != int(from->type.GetConstantDW()) )
 					if( convType != asIC_EXPLICIT_VAL_CAST && node ) Warning(TXT_VALUE_TOO_LARGE_FOR_TYPE, node);
 
-				from->type.SetConstantB(to.IsEnumType() ? to : asCDataType::CreatePrimitive(to.GetTokenType(), true), asINT8(from->type.GetConstantDW()));
+				const asCDataType dt = to.IsEnumType() ? to : asCDataType::CreatePrimitive(to.GetTokenType(), true);
+				from->type.SetConstantB(dt, asINT8(from->type.GetConstantDW()));
 			}
 			else if( to.GetSizeInMemoryBytes() == 2 )
 			{
 				if( asINT16(from->type.GetConstantDW()) != int(from->type.GetConstantDW()) )
 					if( convType != asIC_EXPLICIT_VAL_CAST && node ) Warning(TXT_VALUE_TOO_LARGE_FOR_TYPE, node);
 
-				from->type.SetConstantW(to.IsEnumType() ? to : asCDataType::CreatePrimitive(to.GetTokenType(), true), asINT16(from->type.GetConstantDW()));
+				const asCDataType dt = to.IsEnumType() ? to : asCDataType::CreatePrimitive(to.GetTokenType(), true);
+				from->type.SetConstantW(dt, asINT16(from->type.GetConstantDW()));
 			}
 		}
 	}
@@ -9555,12 +9568,13 @@ void asCCompiler::ImplicitConversionConstant(asCExprContext *from, const asCData
 					(from->type.dataType.GetSizeInMemoryBytes() == 8 && asBYTE(from->type.GetConstantQW()) != from->type.GetConstantQW()) )
 					if( convType != asIC_EXPLICIT_VAL_CAST && node ) Warning(TXT_VALUE_TOO_LARGE_FOR_TYPE, node);
 
+				const asCDataType dt = to.IsEnumType() ? CastToEnumType(to.GetTypeInfo())->enumType : asCDataType::CreatePrimitive(to.GetTokenType(), true);
 				if( from->type.dataType.GetSizeInMemoryBytes() == 2 )
-					from->type.SetConstantB(to.IsEnumType() ? CastToEnumType(to.GetTypeInfo())->enumType : asCDataType::CreatePrimitive(to.GetTokenType(), true), asBYTE(from->type.GetConstantW()));
+					from->type.SetConstantB(dt, asBYTE(from->type.GetConstantW()));
 				else if (from->type.dataType.GetSizeInMemoryBytes() == 4)
-					from->type.SetConstantB(to.IsEnumType() ? CastToEnumType(to.GetTypeInfo())->enumType : asCDataType::CreatePrimitive(to.GetTokenType(), true), asBYTE(from->type.GetConstantDW()));
+					from->type.SetConstantB(dt, asBYTE(from->type.GetConstantDW()));
 				else if (from->type.dataType.GetSizeInMemoryBytes() == 8)
-					from->type.SetConstantB(to.IsEnumType() ? CastToEnumType(to.GetTypeInfo())->enumType : asCDataType::CreatePrimitive(to.GetTokenType(), true), asBYTE(from->type.GetConstantQW()));
+					from->type.SetConstantB(dt, asBYTE(from->type.GetConstantQW()));
 			}
 			else if( to.GetSizeInMemoryBytes() == 2 )
 			{
@@ -9568,17 +9582,19 @@ void asCCompiler::ImplicitConversionConstant(asCExprContext *from, const asCData
 					(from->type.dataType.GetSizeInMemoryBytes() == 8 && asWORD(from->type.GetConstantQW()) != from->type.GetConstantQW()) )
 					if( convType != asIC_EXPLICIT_VAL_CAST && node ) Warning(TXT_VALUE_TOO_LARGE_FOR_TYPE, node);
 
+				const asCDataType dt = to.IsEnumType() ? CastToEnumType(to.GetTypeInfo())->enumType : asCDataType::CreatePrimitive(to.GetTokenType(), true);
 				if (from->type.dataType.GetSizeInMemoryBytes() == 4)
-					from->type.SetConstantW(to.IsEnumType() ? CastToEnumType(to.GetTypeInfo())->enumType : asCDataType::CreatePrimitive(to.GetTokenType(), true), asWORD(from->type.GetConstantDW()));
+					from->type.SetConstantW(dt, asWORD(from->type.GetConstantDW()));
 				else if (from->type.dataType.GetSizeInMemoryBytes() == 8)
-					from->type.SetConstantW(to.IsEnumType() ? CastToEnumType(to.GetTypeInfo())->enumType : asCDataType::CreatePrimitive(to.GetTokenType(), true), asWORD(from->type.GetConstantQW()));
+					from->type.SetConstantW(dt, asWORD(from->type.GetConstantQW()));
 			}
 			else if (to.GetSizeInMemoryBytes() == 4)
 			{
 				if( asDWORD(from->type.GetConstantQW()) != from->type.GetConstantQW())
 					if (convType != asIC_EXPLICIT_VAL_CAST && node) Warning(TXT_VALUE_TOO_LARGE_FOR_TYPE, node);
 
-				from->type.SetConstantDW(to.IsEnumType() ? CastToEnumType(to.GetTypeInfo())->enumType : asCDataType::CreatePrimitive(to.GetTokenType(), true), asDWORD(from->type.GetConstantQW()));
+				const asCDataType dt = to.IsEnumType() ? CastToEnumType(to.GetTypeInfo())->enumType : asCDataType::CreatePrimitive(to.GetTokenType(), true);
+				from->type.SetConstantDW(dt, asDWORD(from->type.GetConstantQW()));
 			}
 		}
 		else
@@ -16503,8 +16519,8 @@ void asCCompiler::CompileMathOperator(asCScriptNode *node, asCExprContext *lctx,
 			}
 			else if( op == ttStarStar )
 			{
-				v = powf(lctx->type.GetConstantF(), rctx->type.GetConstantF());
-				if( v == HUGE_VALF || isinf(v) )
+				v = pow(lctx->type.GetConstantF(), rctx->type.GetConstantF());
+				if( v == HUGE_VALF || ISINF(v) )
 					Error(TXT_POW_OVERFLOW, node);
 			}
 
@@ -16520,7 +16536,7 @@ void asCCompiler::CompileMathOperator(asCScriptNode *node, asCExprContext *lctx,
 				if( op == ttStarStar || op == ttPowAssign )
 				{
 					v = pow(lctx->type.GetConstantD(), int(rctx->type.GetConstantDW()));
-					if( v == HUGE_VAL || isinf(v) )
+					if( v == HUGE_VAL || ISINF(v) )
 						Error(TXT_POW_OVERFLOW, node);
 				}
 				else
@@ -16551,7 +16567,7 @@ void asCCompiler::CompileMathOperator(asCScriptNode *node, asCExprContext *lctx,
 				else if( op == ttStarStar )
 				{
 					v = pow(lctx->type.GetConstantD(), rctx->type.GetConstantD());
-					if( v == HUGE_VAL || isinf(v))
+					if( v == HUGE_VAL || ISINF(v))
 						Error(TXT_POW_OVERFLOW, node);
 				}
 			}
