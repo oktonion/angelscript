@@ -47,16 +47,7 @@
 #include "as_debug.h" // mkdir()
 #include "as_bytecode.h"
 #include "as_scriptobject.h"
-
-#ifndef HUGE_VALF
-#include <limits>
-#endif
-
-#define ISNAN(v) (v != v)
-#define ISINF(v) (!ISNAN(v) && ISNAN(v-v))
-#ifndef HUGE_VALF
-#define HUGE_VALF (std::numeric_limits<float>::infinity())
-#endif
+#include "as_cmath.h"
 
 #ifdef _MSC_VER
 #pragma warning(disable:4702) // unreachable code
@@ -4762,7 +4753,7 @@ static const void *const dispatch_table[256] = {
 		{
 			float r = pow(*(float*)(l_fp - asBC_SWORDARG1(l_bc)), *(float*)(l_fp - asBC_SWORDARG2(l_bc)));
 			*(float*)(l_fp - asBC_SWORDARG0(l_bc)) = r;
-			if( r == HUGE_VALF || ISINF(r) )
+			if( r == AS_HUGE_VALF || AS_ISINF(r) )
 			{
 				// Need to move the values back to the context
 				m_regs.programPointer    = l_bc;
@@ -4781,7 +4772,7 @@ static const void *const dispatch_table[256] = {
 		{
 			double r = pow(*(double*)(l_fp - asBC_SWORDARG1(l_bc)), *(double*)(l_fp - asBC_SWORDARG2(l_bc)));
 			*(double*)(l_fp - asBC_SWORDARG0(l_bc)) = r;
-			if( r == HUGE_VAL || ISINF(r) )
+			if( r == HUGE_VAL || AS_ISINF(r) )
 			{
 				// Need to move the values back to the context
 				m_regs.programPointer    = l_bc;
@@ -4800,7 +4791,7 @@ static const void *const dispatch_table[256] = {
 		{
 			double r = pow(*(double*)(l_fp - asBC_SWORDARG1(l_bc)), *(int*)(l_fp - asBC_SWORDARG2(l_bc)));
 			*(double*)(l_fp - asBC_SWORDARG0(l_bc)) = r;
-			if( r == HUGE_VAL || ISINF(r) )
+			if( r == HUGE_VAL || AS_ISINF(r) )
 			{
 				// Need to move the values back to the context
 				m_regs.programPointer    = l_bc;

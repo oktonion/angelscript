@@ -56,16 +56,7 @@
 #include "as_parser.h"
 #include "as_debug.h"
 #include "as_context.h"  // as_powi()
-
-#ifndef HUGE_VALF
-#include <limits>
-#endif
-
-#define ISNAN(v) (v != v)
-#define ISINF(v) (!ISNAN(v) && ISNAN(v-v))
-#ifndef HUGE_VALF
-#define HUGE_VALF (std::numeric_limits<float>::infinity())
-#endif
+#include "as_cmath.h"
 
 BEGIN_AS_NAMESPACE
 
@@ -16520,7 +16511,7 @@ void asCCompiler::CompileMathOperator(asCScriptNode *node, asCExprContext *lctx,
 			else if( op == ttStarStar )
 			{
 				v = pow(lctx->type.GetConstantF(), rctx->type.GetConstantF());
-				if( v == HUGE_VALF || ISINF(v) )
+				if( v == AS_HUGE_VALF || AS_ISINF(v) )
 					Error(TXT_POW_OVERFLOW, node);
 			}
 
@@ -16536,7 +16527,7 @@ void asCCompiler::CompileMathOperator(asCScriptNode *node, asCExprContext *lctx,
 				if( op == ttStarStar || op == ttPowAssign )
 				{
 					v = pow(lctx->type.GetConstantD(), int(rctx->type.GetConstantDW()));
-					if( v == HUGE_VAL || ISINF(v) )
+					if( v == HUGE_VAL || AS_ISINF(v) )
 						Error(TXT_POW_OVERFLOW, node);
 				}
 				else
@@ -16567,7 +16558,7 @@ void asCCompiler::CompileMathOperator(asCScriptNode *node, asCExprContext *lctx,
 				else if( op == ttStarStar )
 				{
 					v = pow(lctx->type.GetConstantD(), rctx->type.GetConstantD());
-					if( v == HUGE_VAL || ISINF(v))
+					if( v == HUGE_VAL || AS_ISINF(v))
 						Error(TXT_POW_OVERFLOW, node);
 				}
 			}
